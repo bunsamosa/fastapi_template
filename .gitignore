@@ -1,8 +1,8 @@
 # Byte-compiled / optimized / DLL files
-__pycache__/
+**/__pycache__/
 *.py[cod]
 *$py.class
-
+.vscode
 # C extensions
 *.so
 
@@ -102,7 +102,7 @@ celerybeat.pid
 *.sage.py
 
 # Environments
-.env
+#.env
 .venv
 env/
 venv/
@@ -120,6 +120,9 @@ venv.bak/
 # mkdocs documentation
 /site
 
+# pycharm project settings
+.idea
+
 # mypy
 .mypy_cache/
 .dmypy.json
@@ -127,3 +130,9 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# DS Store files
+.DS_Store
+
+# Tokens
+*.token
