@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from apis import test_api
+from rest_server import test_api
 
 
 def import_routes(app: FastAPI) -> None:
