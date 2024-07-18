@@ -1,12 +1,13 @@
+import os
 from typing import Optional
 
 import redis
-from decouple import config
+from pottery import NextId
 from pottery import RedisDict
 
 
 # Read redis host from env
-REDIS_HOST = config("REDIS_HOST", default="redis://127.0.0.1:6379/0")
+REDIS_HOST = os.getenv(key="REDIS_HOST", default="redis://127.0.0.1:6379/0")
 
 
 class CacheStore:
@@ -24,18 +25,18 @@ class CacheStore:
 
         # Validate string namespace
         if not isinstance(namespace, str):
-            raise Exception("Invalid namespace")
+            raise ValueError("Invalid namespace")
 
         namespace = namespace.strip()
         if not namespace:
-            raise Exception("Invalid namespace")
+            raise ValueError("Invalid namespace")
         self.__namespace = namespace
 
         # Check if client is connected to redis
-        if redis_client.ping():
-            self.__client: redis.Redis = redis_client
-        else:
-            raise Exception("Unable to connect to redis")
+        if not redis_client.ping():
+            raise ConnectionError("Unable to connect to redis")
+
+        self.__client: redis.Redis = redis_client
 
     def is_connected(self) -> bool:
         """
@@ -80,12 +81,12 @@ class CacheStore:
             or not isinstance(value, str)
             or not isinstance(expire, int)
         ):
-            raise Exception("Invalid parameter")
+            raise ValueError("Invalid parameter")
 
         key = key.strip()
         value = value.strip()
         if not key or not value or not 0 < expire < 86400:
-            raise Exception("Invalid parameter")
+            raise ValueError("Invalid parameter")
 
         # Attach namespace to key
         key = f"{self.__namespace}_{key}"
@@ -98,30 +99,45 @@ class CacheStore:
         """
         # Validate string key
         if not isinstance(key, str):
-            raise Exception("Invalid key")
+            raise ValueError("Invalid key")
 
         key = key.strip()
         if not key:
-            raise Exception("Invalid key")
+            raise ValueError("Invalid key")
 
         # Attach namespace to key
         key = f"{self.__namespace}_{key}"
         return self.__client.delete(key)
 
-    def get_dictionary(self, key: str) -> Optional[dict]:
+    def get_dictionary(self, key: str) -> RedisDict:
         """
         Get a dictionary stored in redis
         :param key: Key to get dictionary for
         :return: Dictionary for the key
         """
         if not isinstance(key, str):
-            raise Exception("Invalid key")
+            raise ValueError("Invalid key")
 
         key = key.strip()
         if not key:
-            raise Exception("Invalid key")
+            raise ValueError("Invalid key")
 
         # Attach namespace to key
         key = f"{self.__namespace}_{key}"
         value = RedisDict(key=key, redis=self.__client)
         return value
+
+    def get_id_generator(self, key: str):
+        """
+        Get a unique ID generator
+        """
+        if not isinstance(key, str):
+            raise ValueError("Invalid key")
+
+        key = key.strip()
+        if not key:
+            raise ValueError("Invalid key")
+
+        # Attach namespace to key
+        key = f"{self.__namespace}_{key}"
+        return NextId(key=key, masters={self.__client})

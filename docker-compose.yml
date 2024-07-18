@@ -11,12 +11,23 @@ services:
     restart: unless-stopped
     ports:
       - 5000:5000
+    environment:
+      - REDIS_HOST
+      - JWT_ALGORITHM
+      - JWT_SECRET
+      - JWT_AUDIENCE
+      - POSTGRES_URL
+      - POSTGRES_SCHEMA
+    volumes:
+      - ./logs:/src/logs
 
   redis-server:
     container_name: redis-server
     image: redis:alpine
+    command:
+      - "-- requirepass ${REDIS_PASSWORD}"
     restart: unless-stopped
     ports:
       - 6379:6379
     volumes:
-      - ./redis_data:/data
+      - ./deployment/volumes/redis:/data
