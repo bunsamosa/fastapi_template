@@ -1,4 +1,5 @@
 from contextlib import asynccontextmanager
+from typing import AsyncGenerator
 
 import structlog
 from fastapi import FastAPI
@@ -17,7 +18,7 @@ from lib.core.middlewares import create_context
 # Rest server startup hooks
 ###############################################################################
 @asynccontextmanager
-async def lifespan(fastapi: FastAPI) -> None:
+async def lifespan(fastapi: FastAPI) -> AsyncGenerator:
     """
     Initialize modules and attach them to app
     """
