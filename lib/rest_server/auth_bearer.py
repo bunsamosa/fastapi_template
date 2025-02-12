@@ -18,7 +18,7 @@ class JWTBearer(HTTPBearer):
     Handle JWT token authentication
     """
 
-    def __init__(self, auto_error: bool = True) -> None:
+    def __init__(self, auto_error: bool = True):
         super().__init__(auto_error=auto_error)
 
     async def __call__(self, request: Request):
@@ -31,18 +31,14 @@ class JWTBearer(HTTPBearer):
 
         # Validate credentials
         if not credentials:
-            raise HTTPException(
-                status_code=403,
-                detail="Invalid authorization code.",
-            )
+            raise HTTPException(status_code=401, detail="Invalid credentials.")
 
-        elif credentials.scheme != "Bearer":
+        if not credentials.scheme == "Bearer":
             raise HTTPException(
-                status_code=403,
+                status_code=401,
                 detail="Invalid authentication scheme.",
             )
 
-        # Verify JWT
         try:
             user_metadata = jwt.decode(
                 token=credentials.credentials,
@@ -51,14 +47,14 @@ class JWTBearer(HTTPBearer):
                 audience=JWT_AUDIENCE,
             )
         except Exception as exc:
-            print(exc)  # TODO: Add logging
+            await request.app.logger.error(
+                "JWT decode error",
+                exc_info=exc,
+            )
             user_metadata = {}
 
         if not user_metadata:
-            raise HTTPException(
-                status_code=403,
-                detail="Invalid token or expired token.",
-            )
+            raise HTTPException(status_code=401, detail="Invalid credentials.")
 
         return user_metadata
 
