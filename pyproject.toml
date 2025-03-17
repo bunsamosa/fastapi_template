@@ -20,66 +20,49 @@ pypika = "^0.48.9"
 
 
 [tool.poetry.group.dev.dependencies]
-isort = "^5.13.2"
-pylint = "^3.3.2"
-pre-commit = "^4.0.1"
-black = "^24.10.0"
-doppler-env = "^0.3.1"
 types-redis = "^4.6.0.20241004"
 asyncpg-stubs = "^0.30.0"
 types-python-jose = "^3.3.4.20240106"
+pytest-asyncio = "^0.21.0"
+pytest = "^7.4.0"
+pytest-cov = "^4.1.0"
+pre-commit = "^3.5.0"
+ruff = "^0.1.0"
+mypy = "^1.6.0"
+doppler-env = "^0.3.1"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
-[tool.black]
-line-length = 79
-include = '\.pyi?$'
-exclude = '''
-/(
-    \.git
-  | \.hg
-  | \.mypy_cache
-  | \.tox
-  | \.venv
-  | \.env
-  | _build
-  | buck-out
-  | build
-  | dist
-)/
-'''
+[tool.ruff]
+target-version = "py310"
+line-length = 80
+select = ["E", "F", "B", "I", "N", "UP", "ANN", "S", "A", "C4", "T20", "PT", "RET", "SIM"]
+ignore = ["ANN101", "ANN102", "ANN401"]
 
-[tool.isort]
-include_trailing_comma = true
-use_parentheses = true
-multi_line_output = 2
-force_grid_wrap = 0
-sections = ["FUTURE","STDLIB","THIRDPARTY","FIRSTPARTY","LOCALFOLDER"]
-default_section = "THIRDPARTY"
+[tool.ruff.per-file-ignores]
+"tests/**/*.py" = ["S101"]  # Allow assertions in test files
+
+[tool.ruff.isort]
 known_first_party = ["rest_server"]
-line_length = 79
-known_third_party = ["fastapi","pydantic","starlette"]
-force_to_top = true
 
-[tool.flake8]
-format = "flake8"
-show-source = true
-statistics = true
-doctests = true
-enable-extensions = "G"
-strictness = "long"
-docstring-style = "numpy"
-max-line-length = 79
-max-complexity = 25
-exclude = [".git","__pycache__",".venv",".eggs","*.egg"]
-ignore = ["D100", "D104", "D106", "D401", "X100", "W504", "RST303", "RST304", "DAR103", "DAR203", "E501", "W503", "E203", "E722", "B001", "B008", "SIM106", "C901", "SIM102"]
-per-file-ignores = """
-  server/settings/*.py: WPS226, WPS407, WPS412, WPS432
-  server/*/migrations/*.py: WPS102, WPS114, WPS432
-  tests/*.py: S101, WPS432
-  app/*.py: B008
-"""
+[tool.ruff.flake8-annotations]
+allow-star-arg-any = true
 
-[tool.pylint.MESSAGE_CONTROL]
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+strict_optional = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+python_functions = "test_*"
+asyncio_mode = "auto"
